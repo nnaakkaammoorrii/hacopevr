@@ -218,8 +218,7 @@ var setupUserMedia = function(fn) {
 		video: {
             optional: [{sourceId: cameraData[1].id }]
         },
-		audio: true,
-		toString: function() { return "audio, video"; } // for legacy
+		audio: false
 	}, function(stream) {
 		var video = document.createElement("video");
 		if (navigator.mozGetUserMedia) {
