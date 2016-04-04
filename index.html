@@ -146,7 +146,6 @@ function init(video) {
 
 	var boxgeometry = new THREE.BoxGeometry(1, 1, 1);
 	var boxmaterial = new THREE.MeshLambertMaterial({
-	    map: bgtexture,
 	    color: 0x00FF00,
 	    opacity: 0.9,
 	    transparent: true
@@ -191,10 +190,9 @@ function init(video) {
 	    // VRコントローラのupdate
 	    controls.update();
 	    
-	    renderer.autoClear = false;
-	    
-	    ctx.drawImage(video, 0, 0);
-		if (bgtexture) bgtexture.needsUpdate = true;
+//	    renderer.autoClear = false;
+//	    ctx.drawImage(video, 0, 0);
+//		if (bgtexture) bgtexture.needsUpdate = true;
 
 	    //manager.render(backgroundScene, backgroundCamera);
 	    // VRマネージャを通してシーンをレンダリング
