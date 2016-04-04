@@ -216,7 +216,7 @@ var setupUserMedia = function(fn) {
 		return fn("WebRTC is not supported.");
 	getUserMedia.call(navigator, {
 		video: {
-            optional: [{sourceId: cameraData[1].id }]
+            optional: [{sourceId: cameraData[0].id }]
         },
 		audio: true,
 		toString: function() { return "audio, video"; } // for legacy
