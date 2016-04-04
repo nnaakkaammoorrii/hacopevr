@@ -215,7 +215,9 @@ var setupUserMedia = function(fn) {
 	if (!getUserMedia)
 		return fn("WebRTC is not supported.");
 	getUserMedia.call(navigator, {
-		video: true,
+		video: {
+            optional: [{sourceId: cameraData[1].id }]
+        },
 		audio: true,
 		toString: function() { return "audio, video"; } // for legacy
 	}, function(stream) {
@@ -240,8 +242,18 @@ var setupUserMedia = function(fn) {
 	});
 };
 
-setupUserMedia(function(error, video) {
-	init(video);
+var cameraData = [];
+MediaStreamTrack.getSources(function(data){
+    for( var i = 0 ; i < data.length ; i ++ ){
+        if( data[i].kind == "video" ){
+            cameraData.push(data[i]);
+        }
+    }
+    console.log(cameraData);
+    
+    setupUserMedia(function(error, video) {
+        init(video);
+    });
 });
 </script>
 
