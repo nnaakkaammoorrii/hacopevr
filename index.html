@@ -190,11 +190,11 @@ function init(video) {
 	    // VRコントローラのupdate
 	    controls.update();
 	    
-//	    renderer.autoClear = false;
-//	    ctx.drawImage(video, 0, 0);
-//		if (bgtexture) bgtexture.needsUpdate = true;
+	    renderer.autoClear = false;
+	    ctx.drawImage(video, 0, 0);
+		if (bgtexture) bgtexture.needsUpdate = true;
 
-	    //manager.render(backgroundScene, backgroundCamera);
+	    manager.render(backgroundScene, backgroundCamera);
 	    // VRマネージャを通してシーンをレンダリング
 	    manager.render(scene, camera, timestamp);
 
@@ -214,7 +214,7 @@ var setupUserMedia = function(fn) {
 		return fn("WebRTC is not supported.");
 	getUserMedia.call(navigator, {
 		video: {
-            optional: [{sourceId: cameraData[1].id }]
+            optional: [{sourceId: cameraData[2].id }]
         },
 		audio: false
 	}, function(stream) {
