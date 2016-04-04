@@ -51,6 +51,38 @@ function init(video) {
 
 	// VRマネージャの生成
 	var manager = new WebVRManager(renderer, effect);
+	
+	// Create your background scene
+	var backgroundScene = new THREE.Scene();
+	var backgroundCamera = new THREE.Camera();
+	backgroundCamera.updateProjectionMatrix = function(){};
+	backgroundScene.add(backgroundCamera);
+	
+	var canvas = document.createElement("canvas");
+	canvas.width = video.videoWidth;
+	canvas.height = video.videoHeight;
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "#000000";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	var bgtexture = new THREE.Texture(canvas);
+	bgtexture.minFilter = THREE.LinearFilter;
+	bgtexture.magFilter = THREE.LinearFilter;
+	
+	var backgroundMesh = new THREE.Mesh(
+	    new THREE.PlaneGeometry(2, 2, 0),
+	    new THREE.MeshBasicMaterial({
+	        map: bgtexture
+	    }));
+	
+	//var bgmaterial = new THREE.MeshBasicMaterial({map: bgtexture, overdraw: true});
+	// 色々変えると楽しい
+	//var geometry = new THREE.PlaneGeometry(canvas.width, canvas.height, 4, 4);
+	//var geometry = new THREE.SphereGeometry(200, 16, 16);
+	//var bggeometry = new THREE.CubeGeometry(300, 300, 300);
+	//var bgvideoMesh = new THREE.Mesh(bggeometry, bgmaterial);
+	backgroundMesh.material.depthTest = false;
+	backgroundMesh.material.depthWrite = false;
+	backgroundScene.add(backgroundMesh);
 
 	//////////////////////////////////////////////////
 	// 各種オブジェクトのセットアップ
@@ -114,6 +146,7 @@ function init(video) {
 
 	var boxgeometry = new THREE.BoxGeometry(1, 1, 1);
 	var boxmaterial = new THREE.MeshLambertMaterial({
+	    map: bgtexture,
 	    color: 0x00FF00,
 	    opacity: 0.9,
 	    transparent: true
@@ -130,39 +163,6 @@ function init(video) {
 	scene.add(light);
 
 	//////////////////////////////////////////////////
-
-	// Create your background scene
-	var backgroundScene = new THREE.Scene();
-	var backgroundCamera = new THREE.Camera();
-	backgroundCamera.updateProjectionMatrix = function(){};
-	backgroundScene.add(backgroundCamera);
-	
-	var canvas = document.createElement("canvas");
-	canvas.width = video.videoWidth;
-	canvas.height = video.videoHeight;
-	var ctx = canvas.getContext("2d");
-	ctx.fillStyle = "#000000";
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	var bgtexture = new THREE.Texture(canvas);
-	bgtexture.minFilter = THREE.LinearFilter;
-	bgtexture.magFilter = THREE.LinearFilter;
-	
-	var backgroundMesh = new THREE.Mesh(
-	    new THREE.PlaneGeometry(2, 2, 0),
-	    new THREE.MeshBasicMaterial({
-	        map: bgtexture
-	    }));
-	
-	//var bgmaterial = new THREE.MeshBasicMaterial({map: bgtexture, overdraw: true});
-	// 色々変えると楽しい
-	//var geometry = new THREE.PlaneGeometry(canvas.width, canvas.height, 4, 4);
-	//var geometry = new THREE.SphereGeometry(200, 16, 16);
-	//var bggeometry = new THREE.CubeGeometry(300, 300, 300);
-	//var bgvideoMesh = new THREE.Mesh(bggeometry, bgmaterial);
-	backgroundMesh.material.depthTest = false;
-	backgroundMesh.material.depthWrite = false;
-	
-	backgroundScene.add(backgroundMesh);
 
 //	var bgLoader = new THREE.TextureLoader();
 //	bgLoader.load('img/bg.png', onBGTextureLoaded);
@@ -196,7 +196,7 @@ function init(video) {
 	    ctx.drawImage(video, 0, 0);
 		if (bgtexture) bgtexture.needsUpdate = true;
 
-	    manager.render(backgroundScene, backgroundCamera);
+	    //manager.render(backgroundScene, backgroundCamera);
 	    // VRマネージャを通してシーンをレンダリング
 	    manager.render(scene, camera, timestamp);
 
