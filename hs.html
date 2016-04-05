@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>スマホVRサンプル</title>
+<style>
+body {
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #fff;
+    margin: 0px;
+    padding: 0;
+    overflow: hidden;
+}
+</style>
+<script src="js/es6-promise.js"></script>
+<script src="js/three.min.js"></script>
+<script src="js/VRControls.js"></script>
+<script src="js/VREffect.js"></script>
+<script src="js/webvr-polyfill.js"></script>
+<script src="js/webvr-manager.js"></script>
+</head>
+
+<body>
+<script>
+function init(video) {
+	// レンダラを生成
+	var renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+	renderer.setPixelRatio(window.devicePixelRatio);
+	renderer.setClearColor( 0x0000ff, 0.5 );
+
+	document.body.appendChild(renderer.domElement);
+
+	// シーンを生成
+	var scene = new THREE.Scene();
+	//scene.fog = new THREE.FogExp2( 0x000000, 0.0002);
+
+	// カメラを生成
+	var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+
+	// VR用コントローラを生成
+	var controls = new THREE.VRControls(camera);
+
+	// VR用エフェクトを生成
+	var effect = new THREE.VREffect(renderer);
+	effect.setSize(window.innerWidth, window.innerHeight);
+
+	// VRマネージャの生成
+	var manager = new WebVRManager(renderer, effect);
+	
+	// Create your background scene
+	var backgroundScene = new THREE.Scene();
+	var backgroundCamera = new THREE.Camera();
+	backgroundCamera.updateProjectionMatrix = function(){};
+	backgroundScene.add(backgroundCamera);
+	
+	var canvas = document.createElement("canvas");
+	canvas.width = video.videoWidth;
+	canvas.height = video.videoHeight;
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "#000000";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	var bgtexture = new THREE.Texture(canvas);
+	bgtexture.minFilter = THREE.LinearFilter;
+	bgtexture.magFilter = THREE.LinearFilter;
+	
+	var backgroundMesh = new THREE.Mesh(
+	    new THREE.PlaneGeometry(2, 2, 0),
+	    new THREE.MeshBasicMaterial({
+	        map: bgtexture
+	    }));
+	
+	//var bgmaterial = new THREE.MeshBasicMaterial({map: bgtexture, overdraw: true});
+	// 色々変えると楽しい
+	//var geometry = new THREE.PlaneGeometry(canvas.width, canvas.height, 4, 4);
+	//var geometry = new THREE.SphereGeometry(200, 16, 16);
+	//var bggeometry = new THREE.CubeGeometry(300, 300, 300);
+	//var bgvideoMesh = new THREE.Mesh(bggeometry, bgmaterial);
+	backgroundMesh.material.depthTest = false;
+	backgroundMesh.material.depthWrite = false;
+	backgroundScene.add(backgroundMesh);
+
+	//////////////////////////////////////////////////
+	// 各種オブジェクトのセットアップ
+
+	// Skysphereの生成
+	var skysphereLoader = new THREE.TextureLoader();
+	skysphereLoader.load('img/bg_skyplane.png', onSkysphereTextureLoaded);
+	function onSkysphereTextureLoaded(texture) {
+	    texture.wrapS = THREE.RepeatWrapping;
+	    texture.wrapT = THREE.RepeatWrapping;
+	    texture.repeat.set(1, 1);
+
+	    var geometry = new THREE.SphereGeometry(5000, 32, 32);
+	    //var geometry = new THREE.BoxGeometry(1000, 1000, 1000);
+	    var material = new THREE.MeshBasicMaterial({
+	        map: texture,
+	        color: 0xffffff,
+	        side: THREE.BackSide,
+	    });
+
+	    var skysphere = new THREE.Mesh(geometry, material);
+	    skysphere.position.z = 0;
+	    scene.add(skysphere);
+	}
+
+	var planegeometry = new THREE.PlaneGeometry( 13.195, 11.252, 10, 10 );
+	var planematerial = new THREE.MeshBasicMaterial({
+	    color: 0xCCCCFF,
+	    side: THREE.FrontSide,
+	    //wireframe: true,
+	    opacity: 0.8
+	});
+	var plane = new THREE.Mesh(planegeometry, planematerial);
+	plane.rotation.x = Math.PI / -2;
+	plane.position.y = -1.7;
+	scene.add(plane);
+	
+	var planegeometryT = new THREE.PlaneGeometry( 13.195, 11.252, 10, 10 );
+	var planematerialT = new THREE.MeshBasicMaterial({
+	    color: 0xEEEEEE,
+	    side: THREE.BackSide,
+	    //wireframe: true,
+	    opacity: 0.8
+	});
+	var planeT = new THREE.Mesh(planegeometryT, planematerialT);
+	planeT.rotation.x = Math.PI / -2;
+	planeT.position.y = -1.7 + 3;
+	scene.add(planeT);
+
+	var planegeometry2 = new THREE.PlaneGeometry( 13.252, 3, 10, 10 );
+	var planematerial2 = new THREE.MeshBasicMaterial({
+	    color: 0xCCCCCC,
+	    side: THREE.FrontSide,
+	});
+	var plane2 = new THREE.Mesh(planegeometry2, planematerial2);
+	plane2.position.z = 11.252 / 2 * -1;
+	plane2.position.y = -1.7 + 1.5;
+	scene.add(plane2);
+
+	var planegeometry3 = new THREE.PlaneGeometry( 11.252, 3, 10, 10 );
+	var planematerial3 = new THREE.MeshBasicMaterial({
+	    color: 0xCCCCCC,
+	    side: THREE.FrontSide,
+	});
+	var plane3 = new THREE.Mesh(planegeometry3, planematerial3);
+	plane3.rotation.y = Math.PI / 2;
+	plane3.position.x = 13.195 / 2 * -1;
+	plane3.position.y = -1.7 + 1.5;
+	scene.add(plane3);
+	
+	var planegeometry4 = new THREE.PlaneGeometry( 11.252, 3, 10, 10 );
+	var planematerial4 = new THREE.MeshBasicMaterial({
+	    color: 0xCCCCCC,
+	    side: THREE.BackSide,
+	});
+	var plane4 = new THREE.Mesh(planegeometry4, planematerial4);
+	plane4.rotation.y = Math.PI / 2;
+	plane4.position.x = 13.195 / 2;
+	plane4.position.y = -1.7 + 1.5;
+	scene.add(plane4);
+
+	var planegeometry5 = new THREE.PlaneGeometry( 13.252, 3, 10, 10 );
+	var planematerial5 = new THREE.MeshBasicMaterial({
+	    color: 0xCCCCCC,
+	    side: THREE.BackSide,
+	});
+	var plane5 = new THREE.Mesh(planegeometry5, planematerial5);
+	plane5.position.z = 11.252 / 2;
+	plane5.position.y = -1.7 + 1.5;
+	scene.add(plane5);
+
+	// 地球オブジェクトの生成
+	var earth = new THREE.Object3D();
+	var earthLoader = new THREE.TextureLoader();
+	earthLoader.load('img/earth.jpg', onEarthTextureLoaded);
+	function onEarthTextureLoaded(texture) {
+	    texture.wrapS = THREE.RepeatWrapping;
+	    texture.wrapT = THREE.RepeatWrapping;
+
+	    //var geometry = new THREE.SphereGeometry(0.3, 32, 32);
+	    var geometry = new THREE.BoxGeometry(1, 1, 1);
+	    var material = new THREE.MeshLambertMaterial({
+	        map: texture,
+	        color: 0xFFFFFF,
+	        opacity: 0.9,
+	        transparent: true
+	        //wireframe: true,
+	    });
+
+	    earth = new THREE.Mesh(geometry, material);
+	    earth.position.y = -1.7 + 0.5;
+	    earth.position.z = -1;
+	    //scene.add(earth);
+	}
+
+	var boxgeometry = new THREE.BoxGeometry(0.9, 3, 0.63);
+	var boxmaterial = new THREE.MeshLambertMaterial({
+	    color: 0xCCCCCC,
+	    transparent: true,
+	    side: THREE.DoubleSide
+	});
+
+	var box = new THREE.Mesh(boxgeometry, boxmaterial);
+	box.position.y = -1.7 + 1.5;
+	box.position.z = 11.252 / 2 * -1 + 0.315;
+	scene.add(box);
+	
+	var boxgeometry2 = new THREE.BoxGeometry(1, 3, 1);
+	var boxmaterial2 = new THREE.MeshLambertMaterial({
+	    color: 0xCCCCCC,
+	    transparent: true,
+	    side: THREE.DoubleSide
+	});
+	var box2 = new THREE.Mesh(boxgeometry2, boxmaterial2);
+	box2.position.y = -1.7 + 1.5;
+	box2.position.z = 11.252 / 2 * -1 + 0.5;
+	box2.position.x = 13.252 / 2 * -1 + 0.5;
+	scene.add(box2);
+	
+	var boxgeometry3 = new THREE.BoxGeometry(1, 3, 1);
+	var boxmaterial3 = new THREE.MeshLambertMaterial({
+	    color: 0xCCCCCC,
+	    transparent: true,
+	    side: THREE.DoubleSide
+	});
+	var box3 = new THREE.Mesh(boxgeometry3, boxmaterial3);
+	box3.position.y = -1.7 + 1.5;
+	box3.position.z = 11.252 / 2 * -1 + 0.5;
+	box3.position.x = 13.252 / 2 - 0.5;
+	scene.add(box3);
+
+	//var light = new THREE.DirectionalLight(0xffffff, 1.5);
+	var light = new THREE.PointLight(0xffffff, 2, 1500);
+	light.position.set(0, 0, 0);
+	scene.add(light);
+
+	//////////////////////////////////////////////////
+
+//	var bgLoader = new THREE.TextureLoader();
+//	bgLoader.load('img/bg.png', onBGTextureLoaded);
+//	function onBGTextureLoaded(texture) {
+//	    var backgroundMesh = new THREE.Mesh(
+//	    new THREE.PlaneGeometry(2, 2, 0),
+//	    new THREE.MeshBasicMaterial({
+//	        map: texture
+//	    }));
+//	    
+//	    backgroundMesh .material.depthTest = false;
+//	    backgroundMesh .material.depthWrite = false;
+//	    
+//	    backgroundScene.add(backgroundMesh);
+//	};
+
+	// アニメーションループ
+	var lastRender = 0;
+	function animate(timestamp) {
+	//    var delta = Math.min(timestamp - lastRender, 500);
+	//    lastRender = timestamp;
+
+	//    earth.rotation.x += delta * 0.000015;
+	//    earth.rotation.y += delta * 0.000025;
+
+	    // VRコントローラのupdate
+	    controls.update();
+	    
+	    renderer.autoClear = false;
+	    ctx.drawImage(video, 0, 0);
+		if (bgtexture) bgtexture.needsUpdate = true;
+
+	    //manager.render(backgroundScene, backgroundCamera);
+	    // VRマネージャを通してシーンをレンダリング
+	    
+	    //camera.position.y += 5.0;
+	    //if(camera.position.y >= 0) {
+	    //    camera.position.y -= 1.0;
+	    //}
+	    //camera.position.y += 0.25;
+	    //.position.z -= 1.0;
+	    
+	    manager.render(scene, camera, timestamp);
+
+	    // アニメーションループ
+	    requestAnimationFrame(animate);
+	}
+
+	// アニメーションの開始
+	animate(performance ? performance.now() : Date.now());
+};
+
+var setupUserMedia = function(fn) {
+	var getUserMedia = navigator.getUserMedia ||
+		navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+		navigator.msGetUserMedia;
+	if (!getUserMedia)
+		return fn("WebRTC is not supported.");
+	getUserMedia.call(navigator, {
+		video: {
+            optional: [{sourceId: cameraData[2].id }]
+        },
+		audio: false
+	}, function(stream) {
+		var video = document.createElement("video");
+		if (navigator.mozGetUserMedia) {
+			// directly assign `stream` to `video.src` on Firefox (see third hint)
+			// ---> but not working on nightly, why?
+			video.src = stream;
+		} else {
+			var URL = window.URL || window.webkitURL; // need prefix on Webkit
+			video.src = URL.createObjectURL(stream);
+		}
+		// wait a moment because the video size cannot be got immediately (why?)
+		video.play(); // need play in order to do that
+		setTimeout(function wait() {
+			if (video.videoWidth > 0)
+				return fn(null, video); // OK, go next
+			setTimeout(wait, 50);
+		}, 10);
+	}, function(err) {
+		fn(err);
+	});
+};
+
+var cameraData = [];
+MediaStreamTrack.getSources(function(data){
+    for( var i = 0 ; i < data.length ; i ++ ){
+        if( data[i].kind == "video" ){
+            cameraData.push(data[i]);
+        }
+    }
+    console.log(cameraData);
+    
+    setupUserMedia(function(error, video) {
+        init(video);
+    });
+});
+</script>
+
+</body>
+</html>
