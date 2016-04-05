@@ -58,6 +58,7 @@ function init(video) {
 	backgroundCamera.updateProjectionMatrix = function(){};
 	backgroundScene.add(backgroundCamera);
 	
+/*
 	var canvas = document.createElement("canvas");
 	canvas.width = video.videoWidth;
 	canvas.height = video.videoHeight;
@@ -83,6 +84,7 @@ function init(video) {
 	backgroundMesh.material.depthTest = false;
 	backgroundMesh.material.depthWrite = false;
 	backgroundScene.add(backgroundMesh);
+*/
 
 	//////////////////////////////////////////////////
 	// 各種オブジェクトのセットアップ
@@ -268,9 +270,9 @@ function init(video) {
 	    // VRコントローラのupdate
 	    controls.update();
 	    
-	    renderer.autoClear = false;
-	    ctx.drawImage(video, 0, 0);
-		if (bgtexture) bgtexture.needsUpdate = true;
+//	    renderer.autoClear = false;
+//	    ctx.drawImage(video, 0, 0);
+//		if (bgtexture) bgtexture.needsUpdate = true;
 
 	    //manager.render(backgroundScene, backgroundCamera);
 	    // VRマネージャを通してシーンをレンダリング
@@ -326,6 +328,7 @@ var setupUserMedia = function(fn) {
 };
 
 var cameraData = [];
+/*
 MediaStreamTrack.getSources(function(data){
     for( var i = 0 ; i < data.length ; i ++ ){
         if( data[i].kind == "video" ){
@@ -338,6 +341,10 @@ MediaStreamTrack.getSources(function(data){
         init(video);
     });
 });
+*/
+
+init(null);
+
 </script>
 
 </body>
